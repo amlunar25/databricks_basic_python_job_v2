@@ -3,12 +3,10 @@ from basic_python_job.datasets import customer
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, lit
 from pathlib import Path
-
+from basic_python_job.utilities import functionsv as functions
 import logging, re
 
 def test_jobs_ge(spark: SparkSession, tmp_path: Path):
-    from basic_python_job.utilities import funct as functions
-
     logging.info("Testing the ETL job to include etl columns")
 
     #CONFIG
@@ -33,18 +31,18 @@ def test_jobs_ge(spark: SparkSession, tmp_path: Path):
 
     logging.info("Checking for Columns")
     col = ['customer_id','first_name','email','gender']
-    functions.exists_columns_(col,output_df)
+    functions.exists_columns(col,output_df)
 
     logging.info("Checking for Columns without nulls")
     col = ['customer_id','first_name']
-    functions.columns_without_null_(col,output_df)
+    functions.columns_without_null(col,output_df)
 
     logging.info("Checking for Columns without nulls")
     col = ['customer_id']
-    functions.columns_values_between_(col,output_df,10000,50000)
+    functions.columns_values_between(col,output_df,10000,50000)
     
     logging.info("Checking for Columns Types")
-    dic = {'customer_id':'IntegerType','first_name':'StringType'}
-    functions.validate_dtype_(dic,output_df)
+    dic = {'customer_id':'LongType','first_name':'StringType'}
+    functions.validate_dtype(dic,output_df)
 
     logging.info("Testing the ETL job - done")
