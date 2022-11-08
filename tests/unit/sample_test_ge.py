@@ -3,10 +3,10 @@ from basic_python_job.datasets import customer
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, lit
 from pathlib import Path
-from basic_python_job.uti
+from basic_python_job.utilities import functions
 import logging, re
 
-def test_jobs(spark: SparkSession, tmp_path: Path):
+def test_jobs_ge(spark: SparkSession, tmp_path: Path):
     logging.info("Testing the ETL job to include etl columns")
 
     #CONFIG
@@ -29,15 +29,20 @@ def test_jobs(spark: SparkSession, tmp_path: Path):
                 ) 
     output_df = etl_job._transform(test_df)
 
-    logging.info("Checking for Null Values")
+    logging.info("Checking for Columns")
+    col = ['customer_id','first_name','email','gender']
+    functions.exists_columns(col,output_df)
 
+    logging.info("Checking for Columns without nulls")
+    col = ['customer_id','first_name']
+    functions.columns_without_null(col,output_df)
 
-    logging.info("Checking for ISO Format")
-    def is_not_iso_format(row):
-        return None == re.match('^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)((-(\d{2}):(\d{2})|Z)?)$',row.etl_created_dt)
+    logging.info("Checking for Columns without nulls")
+    col = ['customer_id']
+    functions.columns_values_between(col,output_df,10000,50000)
     
-    rdd_not_iso_format = output_df.select('etl_created_dt').rdd
-    rdd_not_iso_format = rdd_not_iso_format.filter(lambda x: is_not_iso_format(x))
-    assert rdd_not_iso_format.count() == 0 
+    logging.info("Checking for Columns Types")
+    dic = {'customer_id':'IntegerType','first_name':'StringType'}
+    functions.validate_dtype(dic,output_df)
 
     logging.info("Testing the ETL job - done")
